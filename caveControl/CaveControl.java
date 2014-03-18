@@ -1,5 +1,6 @@
 package caveControl;
 
+import java.util.logging.Logger;
 
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -24,9 +25,11 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 @Mod(modid = "cavecontrol", name = "Cave Control", version = "0.1")
 
 public class CaveControl {
-
+    public static Logger logger = new Zeno410Logger("CaveControl").logger();
     private Configuration config;
-    private CaveControlSettings settings;
+    private CaveControlSettings settings = new CaveControlSettings();
+    private CaveControlSettings defaultSettings = new CaveControlSettings();
+    private OverworldDataStorage storage;
     
     public int sizeControl() {return settings.sizeControl;}
     public int frequencyControl() {return settings.frequencyControl;}
@@ -36,7 +39,7 @@ public class CaveControl {
 
     static final String caveControlCategory = "Cave Generation Parameters";
 
-    private class CaveControlSettings extends WorldSavedData {
+    static class CaveControlSettings extends WorldSavedData implements PublicallyCloneable {
         int sizeControl = 40;
         int frequencyControl = 15;
 
@@ -45,18 +48,27 @@ public class CaveControl {
         void set(Configuration config) {
             sizeControl = config.get(caveControlCategory, "Size Control", 40).getInt();
             frequencyControl = config.get(caveControlCategory, "Frequency Control", 15).getInt();
+            logger.info("size "+sizeControl + " frequency "+ frequencyControl);
         }
 
         public void readFromNBT(NBTTagCompound tag) {
             sizeControl = tag.getInteger(sizeControlName);
             frequencyControl = tag.getInteger(frequencyControlName);
+            logger.info("loading size "+sizeControl + " frequency "+ frequencyControl);
         }
 
         public void writeToNBT(NBTTagCompound tag) {
             tag.setInteger(sizeControlName, sizeControl);
             tag.setInteger(frequencyControlName, frequencyControl);
+            logger.info("saving size "+sizeControl + " frequency "+ frequencyControl);
         }
 
+        public CaveControlSettings clone() {
+            CaveControlSettings clone = new CaveControlSettings();
+            clone.sizeControl = this.sizeControl;
+            clone.frequencyControl = this.frequencyControl;
+            return clone;
+        }
     }
 
     private Accessor<ChunkProviderServer,IChunkProvider> providerFromChunkServer =
@@ -70,8 +82,20 @@ public class CaveControl {
         config = new Configuration(event.getSuggestedConfigurationFile());
         config.load();
         // get user setting; default to MasterCaver's suggestions
+        defaultSettings.set(config);
 
         config.save();
+        Acceptor<CaveControlSettings> acceptor = new Acceptor<CaveControlSettings>() {
+            public void accept(CaveControlSettings accepted) {
+                CaveControl.this.settings = accepted;
+            }
+        };
+        
+        storage = new OverworldDataStorage(
+                "CaveControlSettings",
+                this.settings,
+                new Default.Self(this.defaultSettings),
+                acceptor);
     }
 
     @EventHandler
@@ -90,6 +114,7 @@ public class CaveControl {
         // pull out the Chunk Generator
         // this whole business will crash if things aren't right. Probably the best behavior,
         // although a polite message might be appropriate
+        storage.onWorldLoad(event);
         ChunkProviderServer currentServer = (ChunkProviderServer)(world.getChunkProvider());
         IChunkProvider currentProvider = this.providerFromChunkServer.get(currentServer);
         if (currentProvider instanceof ChunkProviderGenerate){
@@ -107,6 +132,7 @@ public class CaveControl {
         World world = event.world;
         int dimension = world.provider.dimensionId;
         if (dimension != 0) return;
-        // not saving configs but here is where to do it
+
+        storage.onWorldSave(event,this.settings);
     }
 }
