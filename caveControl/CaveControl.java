@@ -25,7 +25,7 @@ import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 @Mod(modid = "cavecontrol", name = "Cave Control", version = "0.1")
 
 public class CaveControl {
-    public static Logger logger = new Zeno410Logger("CaveControl").logger();
+    //public static Logger logger = new Zeno410Logger("CaveControl").logger();
     private Configuration config;
     private CaveControlSettings settings = new CaveControlSettings();
     private CaveControlSettings defaultSettings = new CaveControlSettings();
@@ -48,19 +48,19 @@ public class CaveControl {
         void set(Configuration config) {
             sizeControl = config.get(caveControlCategory, "Size Control", 40).getInt();
             frequencyControl = config.get(caveControlCategory, "Frequency Control", 15).getInt();
-            logger.info("size "+sizeControl + " frequency "+ frequencyControl);
+            //logger.info("size "+sizeControl + " frequency "+ frequencyControl);
         }
 
         public void readFromNBT(NBTTagCompound tag) {
             sizeControl = tag.getInteger(sizeControlName);
             frequencyControl = tag.getInteger(frequencyControlName);
-            logger.info("loading size "+sizeControl + " frequency "+ frequencyControl);
+            //logger.info("loading size "+sizeControl + " frequency "+ frequencyControl);
         }
 
         public void writeToNBT(NBTTagCompound tag) {
             tag.setInteger(sizeControlName, sizeControl);
             tag.setInteger(frequencyControlName, frequencyControl);
-            logger.info("saving size "+sizeControl + " frequency "+ frequencyControl);
+            //logger.info("saving size "+sizeControl + " frequency "+ frequencyControl);
         }
 
         public CaveControlSettings clone() {

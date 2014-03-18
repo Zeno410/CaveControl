@@ -11,24 +11,24 @@ import net.minecraft.world.gen.MapGenCaves;
  */
 public class MapGenCaveControl extends MapGenCaves {
 
-    public static Logger logger = new Zeno410Logger("MapGenCaves").logger();
+    //public static Logger logger = new Zeno410Logger("MapGenCaves").logger();
     private final int sizeControl;
     private final int frequencyControl;
 
     public MapGenCaveControl(int sizeControl, int frequencyControl) {
         this.sizeControl = sizeControl;
-        this.frequencyControl = sizeControl;
-        logger.info("size "+ sizeControl + "frequency "+ frequencyControl);
+        this.frequencyControl = frequencyControl;
+        //logger.info("size "+ sizeControl + "frequency "+ frequencyControl);
     }
     @Override
-    protected void func_151538_a(World p_151538_1_, int p_151538_2_, int p_151538_3_, int p_151538_4_, int p_151538_5_, Block[] p_151538_6_) {
+    public void func_151538_a(World p_151538_1_, int p_151538_2_, int p_151538_3_, int p_151538_4_, int p_151538_5_, Block[] p_151538_6_) {
         int i1 = this.rand.nextInt(this.rand.nextInt(this.rand.nextInt(sizeControl) + 1) + 1);
 
-        //logger.info(" "+ p_151538_2_+" "+ p_151538_3_+" "+p_151538_4_+" "+p_151538_5_ + " size" + sizeControl);
         if (this.rand.nextInt(frequencyControl) != 0)
         {
             i1 = 0;
         }
+        //logger.info(" "+ p_151538_2_+" "+ p_151538_3_+" "+p_151538_4_+" "+p_151538_5_ + " i1 " + i1 + " size" + sizeControl);
 
         for (int j1 = 0; j1 < i1; ++j1)
         {
